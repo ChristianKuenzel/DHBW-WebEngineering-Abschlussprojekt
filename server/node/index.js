@@ -156,10 +156,16 @@ async function init() {
                                 }
                             }
                         // Check length of message. If too long shorten it.
-                        } else if (messageObj.message.length > 300) {
-                            // messageObj.message.split();
-
-
+                        } else if (messageObj.message.size > 300) {
+                            messageObj.message = messageObj.message.slice(0, 100);
+                            // Push only if normal type message.
+                            messages.push(data);
+                            for (const connectedClient of connectedClients.keys()) {
+                                try {
+                                    connectedClient.send(data);
+                                } catch (e) {
+                                }
+                            }
                         // Send data to all clients.
                         } else {
                             // Push only if normal type message.
