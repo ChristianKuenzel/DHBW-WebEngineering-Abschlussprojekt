@@ -1,5 +1,5 @@
 
-Haeder
+// Haeder
 
 
 // __________________________________________________________________________________________
@@ -27,7 +27,8 @@ async function init() {
     client.clientId = clientId;
 
     // Let user choose his userName.
-    client.userName = getUserName();
+    const userName = getUserName();
+    client.userName = userName;
 
 
 
@@ -42,16 +43,6 @@ async function init() {
     // create a new websocket connection
     const websocket = new WebSocket(`ws://${host}/ws`);
 
-
-    /*// register an event listener if a connection is established
-    websocket.addEventListener('open', () => {
-        // send a "client connected message"
-        websocket.send(`Client client${clientId} connected`);
-        // enable the input controls
-        messageInput.disabled = false;
-        messageButton.disabled = false;
-    });*/
-
     // add an event listener if a message from the server is received
     websocket.addEventListener('message', (messageEvent) => {
         addMessage(messageEvent.data);
@@ -62,9 +53,21 @@ async function init() {
     // add a click listener to the button to send a new message
     messageButton.addEventListener('click', () => {
         // send the value of the text-area to the server
-        let time = Date.now();
-        let timeStamp = JSON.stringify(time);
-        websocket.send(`client${client.userName}: ${messageInput.value} ${timeStamp}`);
+        let date = new Date();
+        let minutes = date.getMinutes().toString();
+        let hours = date.getHours().toString();
+        let timeStamp = hours + ":" + minutes;
+
+        let message = {
+            "clientID": clientId,
+            "userName": userName,
+            "message": messageInput.value,
+            "type": "normal",
+            "time": timeStamp
+        }
+
+        websocket.send(JSON.stringify(message));
+
         // clear the text area
         messageInput.value = '';
     });
@@ -90,14 +93,18 @@ async function init() {
 
 // __________________________________________________________________________________________
 // add a message to the message area
-function addMessage(message) {
-    // create a p element
+function addMessage(jsonString) {
+    let content = JSON.parse(jsonString);
+
     const pElement = document.createElement('p');
-    // add the message as textContent to prevent XSS
-    pElement.textContent = message;
-    // append the p element to the message area
+
+    // Add text of message object.
+    pElement.innerHTML = content.message;
+
+    // Append the p element to the message area
     messageArea.appendChild(pElement);
-    // scroll the element into view
+
+    // Scroll the element into view
     pElement.scrollIntoView();
 }
 
@@ -105,14 +112,16 @@ function addMessage(message) {
 // milliseconds and no user will get the same id.
 // Also: It is not possible to create new id's older than today.
 function getRandomId() {
-    return Date.now();
+    let id = Date.now();
+    console.log(JSON.stringify(id));
+    return JSON.stringify(id);
 }
 
 // Ask user for his temporary name by using a text window.
 function getUserName() {
     var userName = "StandardUser";
     let output = prompt("Please enter your name:", "");
-    if (output != null) {
+    if (output != null && output !== '') {
         userName = output
     }
     return userName
