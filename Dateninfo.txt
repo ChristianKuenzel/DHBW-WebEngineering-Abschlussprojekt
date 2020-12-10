@@ -1,0 +1,35 @@
+Client ID   BenutzerName  Nachricht  Typ(Flüstern / Conection Update: conected/ left / Normal) Uhrzeit Max Anzahl Benutzer
+
+ von user -> server und von server weitergeleitet an alle / einen user:
+{
+    "clientID": 1234812, 
+    "userName": "asfdsa",
+    "message": "asdf",
+    "type": "normal",
+    "time": "srgdsf"
+}
+
+whisper 
+{
+    "clientID": 1234812, 
+    "userName": "asfdsa",
+    "message": "asdf",
+    "type": "whisper",
+    "toClientId":12391289,
+    "time": "srgdsf"
+}
+
+connection establish / disconnected
+{
+    clients:[{
+        "clientID": 123545, 
+        "userName": "asfdsa",
+    },
+    {
+        "clientID": 2354514, 
+        "userName": "asfds",
+    }
+    ]
+    "type": "userList",
+    "usercount": 5 
+}
