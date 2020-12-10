@@ -120,34 +120,34 @@ async function init() {
                     usercount: connectedClients.size
                 }
 
-                for (let i = 0; i < connectedClients.size; i++) {
+                for (const connectedClient of connectedClients.keys()) {
                     let tmpObj = {
-                        clientId: connectedClients[i].clientId,
-                        username: connectedClients[i].userName
+                        clientId: connectedClient.clientId,
+                        username: connectedClient.userName
                     }
                     clientList.clients.push(tmpObj);
                 }
 
                 let tmp = JSON.stringify(clientList);
 
-                for (let i = 0; i < connectedClients.size; i++) {
-                    connectedClients[i].send(tmp);
+                for (const connectedClient of connectedClients.keys()) {
+                    connectedClient.send(tmp);
                 }
 
                 // add an event handler if we receive a new message from the client
                 client.on('message', (data) => {
                     let messageObj = JSON.parse(data);
                     if (messageObj.type === "whisper") {
-                        for (let i = 0; i < connectedClients.size; i++) {
-                            if (connectedClients[i].clientId === messageObj.toClientId) {
-                                connectedClients[i].send(data);
+                        for (const connectedClient of connectedClients.keys()) {
+                            if (connectedClient.clientId === messageObj.toClientId) {
+                                connectedClient.send(data);
                             }
                         }
                     } else {
                         messages.push(data);
-                        for (let i = 0; i < connectedClients.size; i++) {
+                        for (const connectedClient of connectedClients.keys()) {
                             try {
-                                connectedClients[i].send(data);
+                                connectedClient.send(data);
                             } catch (e) { }
                         }
                     }
