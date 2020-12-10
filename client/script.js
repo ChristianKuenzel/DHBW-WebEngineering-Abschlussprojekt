@@ -13,6 +13,7 @@ const messageArea = document.querySelector('#output');
 
 // Create client object.
 let client = {};
+let whisperId = "";
 init();
 
 // __________________________________________________________________________________________
@@ -39,7 +40,7 @@ async function init() {
     // Convert into JSON and add them to the message area.
     const messagesResult = await fetch('/messages', {method: 'GET'});
     const messages = await messagesResult.json();
-    messages.forEach(addMessage);
+    messages.forEach(handleMessage);
 
 
 
@@ -48,7 +49,7 @@ async function init() {
 
     // add an event listener if a message from the server is received
     websocket.addEventListener('message', (messageEvent) => {
-        addMessage(messageEvent.data);
+       handleMessage(messageEvent.data);
     });
 
 
@@ -59,14 +60,27 @@ async function init() {
         let date = new Date();
         let minutes = date.getMinutes().toString();
         let hours = date.getHours().toString();
-        let timeStamp = hours + ":" + minutes;
+        if (minutes.lenght === 1) {
+            minutes = "0" + minutes;
+        }
 
+        if (hours.lenght === 1) {
+            hours = "0" + hours;
+        }
+
+        let timeStamp = hours + ":" + minutes;
+        
         let message = {
             "clientID": clientId,
             "userName": userName,
             "message": messageInput.value,
             "type": "normal",
             "time": timeStamp
+        }
+        
+        if(whisperId !== "") {
+            message.type = "whisper";
+            message.toClientId = whisperId;
         }
 
         websocket.send(JSON.stringify(message));
@@ -83,9 +97,35 @@ async function init() {
         if ((evt.ctrlKey || evt.shiftKey) && evt.key === 'Enter') {
             evt.preventDefault(); // prevent default action
             evt.stopPropagation(); // stop keydown propagation (stop event bubbling)
-            // send message
-            websocket.send(`client${clientId}: ${messageInput.value}`);
-            // clear input
+            let date = new Date();
+            let minutes = date.getMinutes().toString();
+            let hours = date.getHours().toString();
+            if (minutes.lenght === 1) {
+                minutes = "0" + minutes;
+            }
+    
+            if (hours.lenght === 1) {
+                hours = "0" + hours;
+            }
+    
+            let timeStamp = hours + ":" + minutes;
+            
+            let message = {
+                "clientID": clientId,
+                "userName": userName,
+                "message": messageInput.value,
+                "type": "normal",
+                "time": timeStamp
+            }
+            
+            if(whisperId !== "") {
+                message.type = "whisper";
+                message.toClientId = whisperId;
+            }
+    
+            websocket.send(JSON.stringify(message));
+    
+            // clear the text area
             messageInput.value = '';
             // refocus input
             messageInput.focus();
@@ -94,27 +134,98 @@ async function init() {
 
 }
 
+function handleMessage(jsonString) {
+    let content = JSON.parse(jsonString);
+
+    if (content.type === "userList") {
+        changeUserList(jsonString);
+    }
+
+    else {
+        addMessage(jsonString);
+    }
+}
+/*{
+    clients:[{
+        "clientID": 123545, 
+        "userName": "asfdsa",
+    },
+    {
+        "clientID": 2354514, 
+        "userName": "asfds",
+    }
+    ]
+    "type": "userList",
+    "usercount": 5 
+}
+
+<div id="userlist">
+            <div id="usercount">
+                Online: 3
+            </div>
+            <div id="onlineUser">
+                <div class="user">
+                    David
+                </div>
+                <div class="user selected">
+                    Gionny
+                </div>
+                <div class="user ">
+                    Chris
+                </div>
+            </div>
+            
+
+        </div>
+*/
+function changeUserList(jsonString) {
+    let content = JSON.parse(jsonString); 
+
+    console.log(content);
+
+    let usercount = document.getElementById("usercount");
+    usercount.textContent = "Online: " + content.usercount;
+    let onlineUser = document.getElementById("onlineUser");
+    onlineUser.innerHTML = "";
+    for(let i = 0; i < content.clients.length; i++){
+        let divElement = document.createElement("div");
+        divElement.className = "user";
+        let userName = content.clients[i].userName;
+        let clientId = content.clients[i].clientId;
+        divElement.textContent = userName;
+        divElement.id = clientId;
+        divElement.addEventListener("click" , ()=> {
+            if (whisperId === "") {
+                divElement.className = "user selected";
+                whisperId = clientId;
+
+            }
+            else if(whisperId === clientId) {
+                divElement.className = "user";
+                whisperId = "";
+
+            }
+            else {
+                let current = document.getElementById(whisperId);
+                current.className = "user";
+                divElement.className = "user selected";
+                whisperId = clientId; 
+                
+
+            }
+        });
+        onlineUser.appendChild(divElement);
+        
+        
+
+    }
+}
+
+
 // __________________________________________________________________________________________
 // add a message to the message area
 function addMessage(jsonString) {
-    /*
-<div class="messagecontainer">
-    <div class="author">
-            user
-        </div>
-        <div>
-            hello how are you today
-        <span class="time">11:00</span>
-    </div>
- </div>
- let content = {
-            "clientID": clientId,
-            "userName": userName,
-            "message": messageInput.value,
-            "type": "normal",
-            "time": timeStamp
-        }
-    */
+   
     let content = JSON.parse(jsonString);
 
     const messagecontainer = document.createElement('div');
@@ -135,6 +246,10 @@ function addMessage(jsonString) {
     if (client.clientId === content.clientID) {
         messagecontainer.className = "messagecontainer me";
     
+    }
+
+    if(content.type === "whisper") {
+        messagecontainer.className = "messagecontainer whisper";
     }
 
     // Add text of message object.
