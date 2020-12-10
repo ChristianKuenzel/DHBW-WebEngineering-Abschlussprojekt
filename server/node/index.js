@@ -147,6 +147,7 @@ async function init() {
 
                     // Check if message is empty.
                     if (messageObj.message !== "") {
+                        // Check if length to high than shorten it.
                         if(messageObj.message.length > 300){
                             messageObj.message = messageObj.message.substr(0,300);
                             data = JSON.stringify(messageObj);
