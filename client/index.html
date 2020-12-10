@@ -48,16 +48,15 @@
         #output {
             background-color: #DAD7CD;
             height: 90%;
-            overflow: scroll;
+            overflow-x: hidden;
+            overflow-y: scroll;
             
         }
         #chatfield {
             background-color: whitesmoke;
             display: flex;
             height: 10%;
-            margin-left: 0.3rem;
             
-           
         }
 
         p { 
@@ -88,6 +87,13 @@
             width: 100%;
             background: whitesmoke;
             resize: none;
+            border: none;
+            overflow: auto;
+            outline: none;
+
+            -webkit-box-shadow: none;
+            -moz-box-shadow: none;
+            box-shadow: none;
 
         }
 
@@ -99,6 +105,7 @@
             border-radius: 15px;
             font-size: 1.8rem;
             cursor: pointer;
+            outline: none;
         }
 
         .user {
@@ -114,7 +121,32 @@
             background-color: #A3B18A;
         }
 
+        .messagecontainer {
+            border: 2px solid;
+            border-radius: 5px;
+            padding: 5px;
+            margin: 10px;
+            word-break: break-all;
+        }
 
+        .time-right {
+            float: right;
+            color: darkslategray;
+        }
+
+        .absender {
+            font-weight: bold;
+        }
+
+        .whisper {
+            background-color:  #A3B18A;
+        }
+
+        .me {
+            background-color: #b9b7ae;
+        }
+
+        
 
     </style>
 </head>
@@ -122,17 +154,69 @@
 <body>
     <main>
         <div id="userlist">
-            <div class="user">
-                David
+            <div id="usercount">
+                Online: 3
             </div>
-            <div class="user selected">
-                Gionny
+            <div id="onlineUser">
+                <div class="user">
+                    David
+                </div>
+                <div class="user selected">
+                    Gionny
+                </div>
+                <div class="user ">
+                    Chris
+                </div>
             </div>
+            
 
         </div>
         <div id="rightpanel">
            
-            <div id="output"></div>
+            <div id="output">
+                <div class="messagecontainer">
+                    <div class="absender">
+                        user
+
+                    </div>
+                    <div>
+                        hello how are you today
+                    <span class="time-right">11:00</span>
+                    </div>
+                   
+
+                </div>
+
+                <div class="messagecontainer whisper">
+                    <div class="absender">
+                        user
+
+                    </div>
+                    <div>
+                        hello how are you today 
+                        
+                    <span class="time-right">11:00</span>
+                    </div>
+                   
+
+                </div>
+
+                <div class="messagecontainer me">
+                    <div class="absender">
+                        user
+
+                    </div>
+                    <div>
+                        hello how are you today
+
+                    <span class="time-right">11:00</span>
+                    </div>
+                   
+
+                </div>
+
+
+            </div>
             <div id="chatfield">
                 <div id="input">
                     <textarea name="message" id="message" ></textarea>
