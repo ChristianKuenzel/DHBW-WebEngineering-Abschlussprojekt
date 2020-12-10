@@ -145,23 +145,30 @@ async function init() {
                     // Generate message object.
                     let messageObj = JSON.parse(data);
 
-                    // Check type of message.
-                    if (messageObj.type === "whisper") {
-                        for (const connectedClient of connectedClients.keys()) {
-                            // Check if client is target client for private message
-                            if (connectedClient.clientId === messageObj.toClientId) {
-                                connectedClient.send(data);
+                    // Check if message is empty.
+                    if (messageObj.message !== "") {
+                        // Check type of message.
+                        if (messageObj.type === "whisper") {
+                            for (const connectedClient of connectedClients.keys()) {
+                                // Check if client is target client for private message
+                                if (connectedClient.clientId === messageObj.toClientId) {
+                                    connectedClient.send(data);
+                                }
+                            }
+                        // Send data to all clients.
+                        } else {
+                            // Push only if normal type message.
+                            messages.push(data);
+                            for (const connectedClient of connectedClients.keys()) {
+                                try {
+                                    connectedClient.send(data);
+                                } catch (e) {
+                                }
                             }
                         }
-                    // Send data to all clients.
+                    // Message Empty.
                     } else {
-                        // Push only if normal type message.
-                        messages.push(data);
-                        for (const connectedClient of connectedClients.keys()) {
-                            try {
-                                connectedClient.send(data);
-                            } catch (e) { }
-                        }
+                        // Do nothing. No message content to send.
                     }
                 });
 
