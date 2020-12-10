@@ -44,7 +44,7 @@ async function init() {
 
 
     // create a new websocket connection
-    const websocket = new WebSocket(`ws://${host}/ws`);
+    const websocket = new WebSocket(`ws://${host}/ws?clientId=${client.clientId}&userName=${client.userName}`);
 
     // add an event listener if a message from the server is received
     websocket.addEventListener('message', (messageEvent) => {
