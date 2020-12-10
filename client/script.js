@@ -13,6 +13,7 @@ const messageArea = document.querySelector('#output');
 
 // Create client object.
 let client = {};
+// Create object to store id to whisper to
 let whisperId = "";
 init();
 
@@ -49,6 +50,7 @@ async function init() {
 
     // add an event listener if a message from the server is received
     websocket.addEventListener('message', (messageEvent) => {
+        //call handleMessage
        handleMessage(messageEvent.data);
     });
 
@@ -57,9 +59,12 @@ async function init() {
     // add a click listener to the button to send a new message
     messageButton.addEventListener('click', () => {
         // send the value of the text-area to the server
+        // get date hour and minute
         let date = new Date();
         let minutes = date.getMinutes().toString();
         let hours = date.getHours().toString();
+
+        //add leading zero (7 -> 07)
         if (minutes.lenght === 1) {
             minutes = "0" + minutes;
         }
@@ -70,6 +75,7 @@ async function init() {
 
         let timeStamp = hours + ":" + minutes;
         
+        //create message object
         let message = {
             "clientID": clientId,
             "userName": userName,
@@ -78,11 +84,13 @@ async function init() {
             "time": timeStamp
         }
         
+        //check if message is a whisper message and add data
         if(whisperId !== "") {
             message.type = "whisper";
             message.toClientId = whisperId;
         }
 
+        //send data
         websocket.send(JSON.stringify(message));
 
         // clear the text area
@@ -97,36 +105,43 @@ async function init() {
         if ((evt.ctrlKey || evt.shiftKey) && evt.key === 'Enter') {
             evt.preventDefault(); // prevent default action
             evt.stopPropagation(); // stop keydown propagation (stop event bubbling)
-            let date = new Date();
-            let minutes = date.getMinutes().toString();
-            let hours = date.getHours().toString();
-            if (minutes.lenght === 1) {
-                minutes = "0" + minutes;
-            }
-    
-            if (hours.lenght === 1) {
-                hours = "0" + hours;
-            }
-    
-            let timeStamp = hours + ":" + minutes;
-            
-            let message = {
-                "clientID": clientId,
-                "userName": userName,
-                "message": messageInput.value,
-                "type": "normal",
-                "time": timeStamp
-            }
-            
-            if(whisperId !== "") {
-                message.type = "whisper";
-                message.toClientId = whisperId;
-            }
-    
-            websocket.send(JSON.stringify(message));
-    
-            // clear the text area
-            messageInput.value = '';
+            // send the value of the text-area to the server
+        // get date hour and minute
+        let date = new Date();
+        let minutes = date.getMinutes().toString();
+        let hours = date.getHours().toString();
+
+        //add leading zero (7 -> 07)
+        if (minutes.lenght === 1) {
+            minutes = "0" + minutes;
+        }
+
+        if (hours.lenght === 1) {
+            hours = "0" + hours;
+        }
+
+        let timeStamp = hours + ":" + minutes;
+        
+        //create message object
+        let message = {
+            "clientID": clientId,
+            "userName": userName,
+            "message": messageInput.value,
+            "type": "normal",
+            "time": timeStamp
+        }
+        
+        //check if message is a whisper message and add data
+        if(whisperId !== "") {
+            message.type = "whisper";
+            message.toClientId = whisperId;
+        }
+
+        //send data
+        websocket.send(JSON.stringify(message));
+
+        // clear the text area
+        messageInput.value = '';
             // refocus input
             messageInput.focus();
         }
@@ -134,9 +149,11 @@ async function init() {
 
 }
 
+//handle message -> checks type of message and calls proper function
 function handleMessage(jsonString) {
     let content = JSON.parse(jsonString);
 
+    //if type is userlist call changeUserList, else call addMessage
     if (content.type === "userList") {
         changeUserList(jsonString);
     }
@@ -145,66 +162,48 @@ function handleMessage(jsonString) {
         addMessage(jsonString);
     }
 }
-/*{
-    clients:[{
-        "clientID": 123545, 
-        "userName": "asfdsa",
-    },
-    {
-        "clientID": 2354514, 
-        "userName": "asfds",
-    }
-    ]
-    "type": "userList",
-    "usercount": 5 
-}
 
-<div id="userlist">
-            <div id="usercount">
-                Online: 3
-            </div>
-            <div id="onlineUser">
-                <div class="user">
-                    David
-                </div>
-                <div class="user selected">
-                    Gionny
-                </div>
-                <div class="user ">
-                    Chris
-                </div>
-            </div>
-            
-
-        </div>
-*/
+//change userList HTML
 function changeUserList(jsonString) {
     let content = JSON.parse(jsonString); 
 
-    console.log(content);
-
+    //change count of current online users
     let usercount = document.getElementById("usercount");
     usercount.textContent = "Online: " + content.usercount;
+
+    //get onlineUser div and clear it
     let onlineUser = document.getElementById("onlineUser");
     onlineUser.innerHTML = "";
+
+    //for each client in content.Clients add an HTML Element
     for(let i = 0; i < content.clients.length; i++){
+        //create div
         let divElement = document.createElement("div");
+        
+        //set class
         divElement.className = "user";
+
+        //get user data and set textContent to name, id to clientId
         let userName = content.clients[i].userName;
         let clientId = content.clients[i].clientId;
         divElement.textContent = userName;
         divElement.id = clientId;
+
+        //add click event to div
         divElement.addEventListener("click" , ()=> {
+            //if whisperId === "" set style, set whisperId
             if (whisperId === "") {
                 divElement.className = "user selected";
                 whisperId = clientId;
 
             }
+            // if whisperId is my own clientId unset all
             else if(whisperId === clientId) {
                 divElement.className = "user";
                 whisperId = "";
 
             }
+            //if whisperId is other clientId unset other, set me
             else {
                 let current = document.getElementById(whisperId);
                 current.className = "user";
@@ -214,6 +213,7 @@ function changeUserList(jsonString) {
 
             }
         });
+        //append to list
         onlineUser.appendChild(divElement);
         
         
@@ -228,6 +228,7 @@ function addMessage(jsonString) {
    
     let content = JSON.parse(jsonString);
 
+    //create messageContainer, author, textarea and time
     const messagecontainer = document.createElement('div');
 
     const author = document.createElement('div');
@@ -236,18 +237,19 @@ function addMessage(jsonString) {
 
     const time = document.createElement('span');
 
-     // add username    
+     // set content and class of author 
     author.textContent = content.userName;
-
     author.className = "author";
 
+    //set class of messagecontainer
     messagecontainer.className = "messagecontainer";
 
+    //check if senderId is my own id (my own message) and set style if yes
     if (client.clientId === content.clientID) {
-        messagecontainer.className = "messagecontainer me";
-    
+        messagecontainer.className = "messagecontainer me";    
     }
 
+    //check if type of message is whisper and set style if yes
     if(content.type === "whisper") {
         messagecontainer.className = "messagecontainer whisper";
     }
@@ -255,17 +257,16 @@ function addMessage(jsonString) {
     // Add text of message object.
     textarea.innerHTML = content.message;
 
+    // Add time of the message and set style
     time.textContent = content.time;
-
     time.className = "time";
 
+    //append child to create html structure
     textarea.appendChild(time);
-
     messagecontainer.appendChild(author);
-
     messagecontainer.appendChild(textarea);
 
-    // Append the p element to the message area
+    // Append the messagecontainer element to the message area
     messageArea.appendChild(messagecontainer);
 
     // Scroll the element into view
