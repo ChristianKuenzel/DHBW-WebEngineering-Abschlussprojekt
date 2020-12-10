@@ -147,23 +147,16 @@ async function init() {
 
                     // Check if message is empty.
                     if (messageObj.message !== "") {
+                        if(messageObj.message.length > 300){
+                            messageObj.message = messageObj.message.substr(0,300);
+                            data = JSON.stringify(messageObj);
+                        }
                         // Check type of message.
                         if (messageObj.type === "whisper") {
                             for (const connectedClient of connectedClients.keys()) {
                                 // Check if client is target client for private message
                                 if (connectedClient.clientId === messageObj.toClientId) {
                                     connectedClient.send(data);
-                                }
-                            }
-                        // Check length of message. If too long shorten it.
-                        } else if (messageObj.message.size > 300) {
-                            messageObj.message = messageObj.message.slice(0, 100);
-                            // Push only if normal type message.
-                            messages.push(data);
-                            for (const connectedClient of connectedClients.keys()) {
-                                try {
-                                    connectedClient.send(data);
-                                } catch (e) {
                                 }
                             }
                         // Send data to all clients.
