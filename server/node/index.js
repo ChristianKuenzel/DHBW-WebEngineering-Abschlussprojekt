@@ -23,6 +23,10 @@ import ws from 'ws';
 import { parse as parseURL, fileURLToPath } from 'url';
 import { contentType } from 'mime-types';
 
+// __________________________________________________________________________________________
+// Execute main function init()
+init();
+
 // get path relative to current file
 // importent later to resolve and serve the static content (index.html)
 //
@@ -98,27 +102,55 @@ async function init() {
             // let the websocket server handle the request and stablish a connection
             webSocketServer.handleUpgrade(req, socket, header, (client) => {
                 // log that a new client is connected
-                console.log('new client connected');
+                /*console.log('new client connected');*/
                 // notify the websocket server that a new client is connected
                 webSocketServer.emit('connection', client, req);
-
+                // /ws?clientId=123&username=david
+                client.clientId = req.url.split("&")[0].split("=")[1];
+                client.username = req.url.split("&")[1].split("=")[1];
 
                 // add the client to our internal list of connected
                 connectedClients.add(client);
 
+                let clientList = {
+                    clients:[],
+                    type: "userList",
+                    usercount: connectedClients.size
+                }
+
+                for (let i = 0; i < connectedClients.size; i++) {
+                    let tmpObj = {
+                        clientId: connectedClients[i].clientId,
+                        username: connectedClients[i].userName
+                    }
+                    clientList.clients.push(tmpObj);
+                }
+
+                let tmp = JSON.stringify(clientList);
+
+                for (let i = 0; i < connectedClients.size; i++) {
+                    connectedClients[i].send(tmp);
+                }
+
                 // add an event handler if we receive a new message from the client
                 client.on('message', (data) => {
-                    const message = data;
-                    
-                    // push the massage into our message array to store all received messages
-                    messages.push(message);
-                    // relay the message to all connected clients
-                    for (const connectedClient of connectedClients.keys()) {
-                        try {
-                            connectedClient.send(data);
-                        } catch (e) { }
+                    let messageObj = JSON.parse(data);
+                    if (messageObj.type === "whisper") {
+                        for (let i = 0; i < connectedClients.size; i++) {
+                            if (connectedClients[i].clientId === messageObj.toClientId) {
+                                connectedClients[i].send(data);
+                            }
+                        }
+                    } else {
+                        messages.push(data);
+                        for (let i = 0; i < connectedClients.size; i++) {
+                            try {
+                                connectedClients[i].send(data);
+                            } catch (e) { }
+                        }
                     }
                 });
+
                 // add an event listener to be notified if a client disonnectes
                 client.on('close', () => {
                     console.log('client disconnected');
@@ -150,5 +182,3 @@ async function init() {
         process.exit(0);
     })
 }
-// init server
-init();
