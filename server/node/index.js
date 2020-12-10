@@ -110,7 +110,7 @@ async function init() {
                 // Get information clientId and username from request url
                 // /ws?clientId=123&username=david
                 client.clientId = req.url.split("&")[0].split("=")[1];
-                client.username = req.url.split("&")[1].split("=")[1];
+                client.userName = req.url.split("&")[1].split("=")[1];
 
                 // Add client to list of connected clients.
                 connectedClients.add(client);
@@ -127,7 +127,7 @@ async function init() {
                 for (const connectedClient of connectedClients.keys()) {
                     let tmpObj = {
                         clientId: connectedClient.clientId,
-                        username: connectedClient.userName
+                        userName: connectedClient.userName
                     }
                     clientList.clients.push(tmpObj);
                 }
@@ -155,6 +155,11 @@ async function init() {
                                     connectedClient.send(data);
                                 }
                             }
+                        // Check length of message. If too long shorten it.
+                        } else if (messageObj.message.length > 300) {
+                            // messageObj.message.split();
+
+
                         // Send data to all clients.
                         } else {
                             // Push only if normal type message.
@@ -189,7 +194,7 @@ async function init() {
                     for (const connectedClient of connectedClients.keys()) {
                         let tmpObj = {
                             clientId: connectedClient.clientId,
-                            username: connectedClient.userName
+                            userName: connectedClient.userName
                         }
                         clientList.clients.push(tmpObj);
                     }
@@ -221,7 +226,7 @@ async function init() {
                     for (const connectedClient of connectedClients.keys()) {
                         let tmpObj = {
                             clientId: connectedClient.clientId,
-                            username: connectedClient.userName
+                            userName: connectedClient.userName
                         }
                         clientList.clients.push(tmpObj);
                     }
