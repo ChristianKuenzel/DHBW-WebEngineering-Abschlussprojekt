@@ -97,29 +97,33 @@ async function init() {
             res.end();
         }
     });
+
     // websocket connections must be handled in a spcial way so we listen to an "upgrade" request from the client
     httpServer.on('upgrade', (req, socket, header) => {
         // if a client sends an upgrade request with http GET to the /ws path we'll handle this request and pass it to the websocket server
         if (req.method === 'GET' && req.url.startsWith('/ws')) {
             // let the websocket server handle the request and stablish a connection
             webSocketServer.handleUpgrade(req, socket, header, (client) => {
-                // log that a new client is connected
-                /*console.log('new client connected');*/
                 // notify the websocket server that a new client is connected
                 webSocketServer.emit('connection', client, req);
+
+                // Get information clientId and username from request url
                 // /ws?clientId=123&username=david
                 client.clientId = req.url.split("&")[0].split("=")[1];
                 client.username = req.url.split("&")[1].split("=")[1];
 
-                // add the client to our internal list of connected
+                // Add client to list of connected clients.
                 connectedClients.add(client);
 
+                // Create/"Update" clientList by creating new one.
+                // Generate object with list of clients
                 let clientList = {
                     clients:[],
                     type: "userList",
                     usercount: connectedClients.size
                 }
 
+                // Add all clients as object with clientId and username to client list
                 for (const connectedClient of connectedClients.keys()) {
                     let tmpObj = {
                         clientId: connectedClient.clientId,
@@ -128,22 +132,30 @@ async function init() {
                     clientList.clients.push(tmpObj);
                 }
 
+                // Change format
                 let tmp = JSON.stringify(clientList);
 
+                // Send client list to every client
                 for (const connectedClient of connectedClients.keys()) {
                     connectedClient.send(tmp);
                 }
 
-                // add an event handler if we receive a new message from the client
+                // Event handler if new client message is received.
                 client.on('message', (data) => {
+                    // Generate message object.
                     let messageObj = JSON.parse(data);
+
+                    // Check type of message.
                     if (messageObj.type === "whisper") {
                         for (const connectedClient of connectedClients.keys()) {
+                            // Check if client is target client for private message
                             if (connectedClient.clientId === messageObj.toClientId) {
                                 connectedClient.send(data);
                             }
                         }
+                    // Send data to all clients.
                     } else {
+                        // Push only if normal type message.
                         messages.push(data);
                         for (const connectedClient of connectedClients.keys()) {
                             try {
@@ -155,17 +167,68 @@ async function init() {
 
                 // add an event listener to be notified if a client disonnectes
                 client.on('close', () => {
-                    console.log('client disconnected');
                     // remove the client from the connected clients list
                     connectedClients.delete(client);
+
+                    // "Update" clientList by creating new one.
+                    // Generate object with list of clients
+                    let clientList = {
+                        clients:[],
+                        type: "userList",
+                        usercount: connectedClients.size
+                    }
+
+                    // Add all clients as object with clientId and username to client list
+                    for (const connectedClient of connectedClients.keys()) {
+                        let tmpObj = {
+                            clientId: connectedClient.clientId,
+                            username: connectedClient.userName
+                        }
+                        clientList.clients.push(tmpObj);
+                    }
+
+                    // Change format
+                    let tmp = JSON.stringify(clientList);
+
+                    // Send client list to every client
+                    for (const connectedClient of connectedClients.keys()) {
+                        connectedClient.send(tmp);
+                    }
                 });
+
                 // add an event listener if an errors happens during the connection
                 client.on('error', () => {
                     console.log('client error - disconnected');
                     // also remove the client from the connected client list if an erro appears
                     connectedClients.delete(client);
+
+                    // "Update" clientList by creating new one.
+                    // Generate object with list of clients
+                    let clientList = {
+                        clients:[],
+                        type: "userList",
+                        usercount: connectedClients.size
+                    }
+
+                    // Add all clients as object with clientId and username to client list
+                    for (const connectedClient of connectedClients.keys()) {
+                        let tmpObj = {
+                            clientId: connectedClient.clientId,
+                            username: connectedClient.userName
+                        }
+                        clientList.clients.push(tmpObj);
+                    }
+
+                    // Change format
+                    let tmp = JSON.stringify(clientList);
+
+                    // Send client list to every client
+                    for (const connectedClient of connectedClients.keys()) {
+                        connectedClient.send(tmp);
+                    }
                 });
             })
+
         // if the path to handle websocket connections is wrong just destroy the second to abbort the connection attempt
         } else {
             socket.destroy();
