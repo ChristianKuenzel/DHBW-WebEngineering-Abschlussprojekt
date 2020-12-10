@@ -1,7 +1,16 @@
+/*
 
-// Haeder
+Copyright 2020
+DHBW Lörrach, WebEngineering Abschlussprojekt: Server-Client based WebChatApplication
+David Schüler, Matr.Nr.: ?, <david.schueler97@gmail.com>, https://github.com/AranguZ
+Christian Künzel, Matr.Nr.: 3889521, <kunibertgames@web.de>, https://github.com/ChristianKuenzel
 
+Application got created based on IP & work of Mathis Zeiher <GitHub: mzeiher>
 
+Content undergoes the terms of chosen licenses. See GitHub for more:
+https://github.com/ChristianKuenzel/DHBW-WebEngineering-Abschlussprojekt
+
+*/
 // __________________________________________________________________________________________
 // safe references to DOM nodes in variables for easy access
 const messageInput = document.querySelector('#message');
@@ -208,16 +217,11 @@ function changeUserList(jsonString) {
                 let current = document.getElementById(whisperId);
                 current.className = "user";
                 divElement.className = "user selected";
-                whisperId = clientId; 
-                
-
+                whisperId = clientId;
             }
         });
         //append to list
         onlineUser.appendChild(divElement);
-        
-        
-
     }
 }
 
