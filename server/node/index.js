@@ -83,8 +83,11 @@ async function init() {
                 console.log('new client connected');
                 // notify the websocket server that a new client is connected
                 webSocketServer.emit('connection', client, req);
-                // add the client to our internal list of connected 
+
+
+                // add the client to our internal list of connected
                 connectedClients.add(client);
+
                 // add an event handler if we receive a new message from the client
                 client.on('message', (data) => {
                     const message = data;
