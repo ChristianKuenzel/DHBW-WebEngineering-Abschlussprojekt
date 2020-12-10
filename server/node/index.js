@@ -1,3 +1,20 @@
+/*
+
+Copyright 2020
+DHBW Lörrach, WebEngineering Abschlussprojekt: Server-Client based WebChatApplication
+David Schüler, Matr.Nr.: ?, <david.schueler97@gmail.com>, https://github.com/AranguZ
+Christian Künzel, Matr.Nr.: 3889521, <kunibertgames@web.de>, https://github.com/ChristianKuenzel
+
+Application got created based on IP & work of Mathis Zeiher <GitHub: mzeiher>
+
+Content undergoes the terms of chosen licenses. See GitHub for more:
+https://github.com/ChristianKuenzel/DHBW-WebEngineering-Abschlussprojekt
+
+HTML Skript
+
+*/
+// __________________________________________________________________________________________
+
 import { readFile, writeFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import { resolve, parse as parsePath } from 'path';
@@ -57,7 +74,8 @@ async function init() {
             res.end(JSON.stringify(messages));
 
         // else if the request method is GET and we find the requested paht in the STATIC_CONTENT folder we serve the requested file
-        // the path.substr(1) must be done to remove the leading "/" from path because we want to look up the file relative to the content path and / will indicate look at root level
+        // the path.substr(1) must be done to remove the leading "/" from path because we want to look up the file
+        // relative to the content path and / will indicate look at root level
         } else if (req.method === 'GET' && existsSync(resolve(STATIC_CONTENT, path.substr(1)))) {
             // parse path (get extension, file name and base dir)
             const fileInfo = parsePath(resolve(STATIC_CONTENT, path.substr(1)));

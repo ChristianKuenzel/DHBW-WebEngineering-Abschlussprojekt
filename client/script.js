@@ -1,7 +1,18 @@
+/*
 
-// Haeder
+Copyright 2020
+DHBW Lörrach, WebEngineering Abschlussprojekt: Server-Client based WebChatApplication
+David Schüler, Matr.Nr.: ?, <david.schueler97@gmail.com>, https://github.com/AranguZ
+Christian Künzel, Matr.Nr.: 3889521, <kunibertgames@web.de>, https://github.com/ChristianKuenzel
 
+Application got created based on IP & work of Mathis Zeiher <GitHub: mzeiher>
 
+Content undergoes the terms of chosen licenses. See GitHub for more:
+https://github.com/ChristianKuenzel/DHBW-WebEngineering-Abschlussprojekt
+
+HTML Skript
+
+*/
 // __________________________________________________________________________________________
 // safe references to DOM nodes in variables for easy access
 const messageInput = document.querySelector('#message');
@@ -30,15 +41,11 @@ async function init() {
     const userName = getUserName();
     client.userName = userName;
 
-
-
     // Request all messages that had already been written from the server.
     // Convert into JSON and add them to the message area.
     const messagesResult = await fetch('/messages', {method: 'GET'});
     const messages = await messagesResult.json();
     messages.forEach(addMessage);
-
-
 
     // create a new websocket connection
     const websocket = new WebSocket(`ws://${host}/ws`);
@@ -47,8 +54,6 @@ async function init() {
     websocket.addEventListener('message', (messageEvent) => {
         addMessage(messageEvent.data);
     });
-
-
 
     // add a click listener to the button to send a new message
     messageButton.addEventListener('click', () => {
@@ -71,8 +76,6 @@ async function init() {
         // clear the text area
         messageInput.value = '';
     });
-
-
 
     // add an event listener to the text-area to be able to send messages with a shift+enter
     messageInput.addEventListener('keydown', (evt) => {
