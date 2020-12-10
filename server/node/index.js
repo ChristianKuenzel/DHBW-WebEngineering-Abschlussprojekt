@@ -23,9 +23,6 @@ import ws from 'ws';
 import { parse as parseURL, fileURLToPath } from 'url';
 import { contentType } from 'mime-types';
 
-// __________________________________________________________________________________________
-// Execute main function init()
-init();
 
 // get path relative to current file
 // importent later to resolve and serve the static content (index.html)
@@ -41,6 +38,11 @@ const MESSAGE_PATH = resolve(modulePath, 'messages.json');
 
 // create an absolute path from where static content is served (index.html for example)
 const STATIC_CONTENT = resolve(modulePath, '../../client');
+
+// __________________________________________________________________________________________
+// Execute main function init()
+init();
+
 
 // top level await not yet support for all nodejs runtimes
 async function init() {
