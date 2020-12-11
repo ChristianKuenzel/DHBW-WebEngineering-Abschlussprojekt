@@ -121,11 +121,11 @@ async function init() {
         let hours = date.getHours().toString();
 
         //add leading zero (7 -> 07)
-        if (minutes.lenght === 1) {
+        if (minutes.length === 1) {
             minutes = "0" + minutes;
         }
 
-        if (hours.lenght === 1) {
+        if (hours.length === 1) {
             hours = "0" + hours;
         }
 
